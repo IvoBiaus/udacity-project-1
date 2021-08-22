@@ -1,7 +1,5 @@
 import express from 'express';
 
-const basicFn = (): number => 25;
-
 const app = express();
 const port = 3000;
 
@@ -13,4 +11,4 @@ app.get('/', (req, res) => {
   res.send('Root directory.');
 });
 
-export default basicFn;
+export default app;
