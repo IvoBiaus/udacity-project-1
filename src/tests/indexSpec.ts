@@ -1,6 +1,7 @@
 import fs from 'fs';
 import supertest from 'supertest';
 import app from '../index';
+import { failedUpload, successUpload, uploadHtml } from '../routes/api/upload';
 
 const request = supertest(app);
 
@@ -40,20 +41,25 @@ describe('Test endpoints responses', () => {
     expect(response.status).toBe(400);
   });
 
-  it('image upload responds 400 when no file is attached', async () => {
+  it('upload GET responds with form', async () => {
     const response = await request.get('/api/upload').set('content-type', 'multipart/form-data');
-    expect(response.status).toBe(400);
+    expect(response.text).toBe(uploadHtml);
   });
 
-  it('image upload responds 200 when the file is attached', async () => {
+  it('upload POST responds with success html when the file is attached & uploaded', async () => {
     const filePath = `${__dirname}/image.png`;
     fs.writeFileSync(filePath, Buffer.from(''));
     const file = fs.readFileSync(filePath);
 
     const response = await request
-      .get('/api/upload')
+      .post('/api/upload')
       .set('content-type', 'multipart/form-data')
       .attach('image', file, 'image.png');
-    expect(response.status).toBe(200);
+    expect(response.text).toBe(successUpload);
+  });
+
+  it('upload POST responds with failure html when no file is attached', async () => {
+    const response = await request.post('/api/upload').set('content-type', 'multipart/form-data');
+    expect(response.text).toBe(failedUpload);
   });
 });
