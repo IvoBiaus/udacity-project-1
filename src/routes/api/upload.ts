@@ -1,32 +1,28 @@
 import express from 'express';
 import fileUpload from 'express-fileupload';
+import { promises as fs } from 'fs';
+import { failedUpload, successUpload, uploadPage } from '../../constants/html';
+import { isValidMime } from '../../utils/validators';
 
 const upload = express.Router();
 upload.use(fileUpload());
 
-upload.get('/', (req, res) => res.send(uploadHtml));
+upload.get('/', (req, res) => res.send(uploadPage));
 
-upload.post('/', (req, res) => {
-  const file = req.files?.image;
+upload.post('/', async (req, res) => {
+  const file = req.files?.image as fileUpload.UploadedFile | undefined;
+  const root = `${process.cwd()}/build`;
 
-  if (file) {
-    return res.send(successUpload);
+  if (file && isValidMime(file.mimetype)) {
+    const imagesPath = `${root}/images/${file.name}`;
+    try {
+      await fs.writeFile(imagesPath, file.data);
+      return res.send(successUpload);
+    } catch (error) {
+      return res.sendStatus(500);
+    }
   }
   return res.send(failedUpload);
 });
 
-export const successUpload = '<body><span>Success!</span></body>';
-export const failedUpload = '<body><span>Failed</span></body>';
-export const uploadHtml = `
-  <body>
-    <form
-      method="POST"
-      action="upload"
-      style="display: flex;flex-direction: column;width: fit-content"
-      encType="multipart/form-data"
-    >
-      <input type="file" accept="image/*" id="imageInput" name="image" />
-      <input style="margin-top: 15px" type="submit">
-    </form>
-  </body>`;
 export default upload;
