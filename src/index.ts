@@ -1,10 +1,13 @@
 import express from 'express';
 import routes from './routes';
 import fs from 'fs';
+import { cacheDir, imagesDir } from './constants/directories';
 
-const imgStorage = `${__dirname}/images`;
-if (!fs.existsSync(imgStorage)) {
-  fs.mkdirSync(imgStorage);
+if (!fs.existsSync(imagesDir)) {
+  fs.mkdirSync(imagesDir);
+}
+if (!fs.existsSync(cacheDir)) {
+  fs.mkdirSync(cacheDir);
 }
 
 const app = express();
