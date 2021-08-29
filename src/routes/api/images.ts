@@ -1,6 +1,8 @@
 import express from 'express';
 import fs, { promises as fsP } from 'fs';
 import sharp from 'sharp';
+import FileType from 'file-type';
+
 import { imagesDir } from '../../constants/directories';
 import { getCacheFilePath, getGallery, getImg } from '../../utils/helpers';
 
@@ -9,6 +11,8 @@ const images = express.Router();
 images.get('/', async (req, res) => {
   const { fileName, width, height } = req.query;
   const hasNoParams = [fileName, width, height].every(value => !value);
+  res.setHeader('Cache-Control', 'max-age=7884000, no-cache');
+  res.setHeader('Vary', 'ETag, Content-Encoding');
 
   // Show all images
   if (hasNoParams) {
@@ -32,12 +36,17 @@ images.get('/', async (req, res) => {
   // Get original image
   const getOriginalFile = !!fileName && !width && !height;
   if (getOriginalFile) {
-    return res.sendFile(`${imagesDir}/${fileName}`);
+    const originalPath = `${imagesDir}/${fileName}`;
+    const mime = (await FileType.fromFile(originalPath))?.mime ?? '';
+    res.setHeader('Content-Type', mime);
+    return res.sendFile(originalPath);
   }
 
   // Return existent cached file
   const cachePath = getCacheFilePath(`${fileName}`, `${width}`, `${height}`);
   if (fs.existsSync(cachePath)) {
+    const mime = (await FileType.fromFile(cachePath))?.mime ?? '';
+    res.setHeader('Content-Type', mime);
     return res.sendFile(cachePath);
   }
 
@@ -48,6 +57,8 @@ images.get('/', async (req, res) => {
       .resize(parseInt(`${width}`), parseInt(`${height}`))
       .toBuffer();
     await fsP.writeFile(cachePath, resizedFile);
+    const mime = (await FileType.fromFile(cachePath))?.mime ?? '';
+    res.setHeader('Content-Type', mime);
     return res.sendFile(cachePath);
   } catch (error) {
     return res.sendStatus(400);
