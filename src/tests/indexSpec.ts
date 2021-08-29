@@ -13,16 +13,14 @@ describe('Test endpoints responses', async () => {
   if (!fs.existsSync(testImgStorage)) {
     await fsP.mkdir(testImgStorage);
   }
-  const mockBuffer = await sharp({
+  const mockSharp = sharp({
     create: {
       width: 1,
       height: 1,
       channels: 4,
       background: { r: 0, g: 0, b: 0, alpha: 0 },
     },
-  })
-    .png()
-    .toBuffer();
+  }).png();
 
   it('server responds correctly', async () => {
     const response = await request.get('/');
@@ -36,7 +34,7 @@ describe('Test endpoints responses', async () => {
 
   it('images responds 200 with all the parameters and existent file', async () => {
     const filePath = `${imagesDir}/existent.png`;
-    await fsP.writeFile(filePath, mockBuffer);
+    await fsP.writeFile(filePath, await mockSharp.toBuffer());
 
     const response = await request.get('/api/images?fileName=existent.png&width=200&height=200');
     expect(response.status).toBe(200);
@@ -75,7 +73,7 @@ describe('Test endpoints responses', async () => {
 
   it('upload POST responds with success html when the file is attached & uploaded', async () => {
     const filePath = `${__dirname}/mocks/image.png`;
-    await fsP.writeFile(filePath, mockBuffer);
+    await fsP.writeFile(filePath, await mockSharp.toBuffer());
     const file = await fsP.readFile(filePath);
 
     const response = await request
@@ -98,7 +96,7 @@ describe('Test endpoints responses', async () => {
 
   it('upload POST responds with failure html when file is not an image', async () => {
     const filePath = `${__dirname}/mocks/report.pdf`;
-    await fsP.writeFile(filePath, mockBuffer);
+    await fsP.writeFile(filePath, await mockSharp.toBuffer());
     const file = await fsP.readFile(filePath);
 
     const response = await request
