@@ -5,6 +5,7 @@ import sharp from 'sharp';
 import app from '../index';
 import { uploadPage } from '../constants/html';
 import { imagesDir } from '../constants/directories';
+import { getCacheFilePath } from '../utils/helpers';
 
 const request = supertest(app);
 
@@ -33,12 +34,14 @@ describe('Test endpoints responses', async () => {
   });
 
   it('images responds 200 with all the parameters and existent file', async () => {
-    const filePath = `${imagesDir}/existent.png`;
+    const fileName = `${Date.now()}.png`;
+    const filePath = `${imagesDir}/${fileName}`;
     await fsP.writeFile(filePath, await mockSharp.toBuffer());
 
-    const response = await request.get('/api/images?fileName=existent.png&width=200&height=200');
+    const response = await request.get(`/api/images?fileName=${fileName}&width=200&height=200`);
     expect(response.status).toBe(200);
     await fsP.rm(filePath);
+    await fsP.rm(getCacheFilePath(fileName, '200', '200'));
   });
 
   it('images responds 400 when requesting nonexistent file', async () => {
@@ -72,15 +75,17 @@ describe('Test endpoints responses', async () => {
   });
 
   it('upload POST responds with success html when the file is attached & uploaded', async () => {
-    const filePath = `${__dirname}/mocks/image.png`;
+    const fileName = `${Date.now()}.png`;
+    const filePath = `${__dirname}/mocks/${fileName}`;
     await fsP.writeFile(filePath, await mockSharp.toBuffer());
     const file = await fsP.readFile(filePath);
 
     const response = await request
       .post('/api/upload')
       .set('content-type', 'multipart/form-data')
-      .attach('image', file, 'image.png');
+      .attach('image', file, fileName);
     await fsP.rm(filePath);
+    await fsP.rm(`${imagesDir}/${fileName}`);
     expect(response.text).toBe(uploadPage('Success!'));
   });
 
@@ -89,7 +94,7 @@ describe('Test endpoints responses', async () => {
     expect(response.text).toBe(uploadPage('Failed'));
   });
 
-  it('upload POST responds with failure html when file is not an image', async () => {
+  it('upload POST responds with failure html when no file is attached', async () => {
     const response = await request.post('/api/upload').set('content-type', 'multipart/form-data');
     expect(response.text).toBe(uploadPage('Failed'));
   });

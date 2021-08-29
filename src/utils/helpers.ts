@@ -1,11 +1,15 @@
 import { cacheDir } from '../constants/directories';
 import { header } from '../constants/html';
 
-export const getCacheName = (originalName: string, width: string, height: string): string =>
-  `${width}-${height}-${originalName}`;
+const getCacheName = (originalName: string, width: string, height: string, fit = ''): string =>
+  `${width}-${height}-${fit}-${originalName}`;
 
-export const getCacheFilePath = (originalName: string, width: string, height: string): string =>
-  `${cacheDir}/${getCacheName(originalName, width, height)}`;
+export const getCacheFilePath = (
+  originalName: string,
+  width: string,
+  height: string,
+  fit = '',
+): string => `${cacheDir}/${getCacheName(originalName, width, height, fit)}`;
 
 export const getImg = (protocol: string, host: string, fileName: string): string => {
   const url = `${protocol}://${host}/api/images?fileName=${fileName}`;

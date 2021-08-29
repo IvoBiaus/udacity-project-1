@@ -9,10 +9,10 @@ import { getCacheFilePath, getGallery, getImg } from '../../utils/helpers';
 const images = express.Router();
 
 images.get('/', async (req, res) => {
-  const { fileName, width, height } = req.query;
+  const { fileName, width, height, fit } = req.query;
   const hasNoParams = [fileName, width, height].every(value => !value);
   res.setHeader('Cache-Control', 'max-age=7884000, no-cache');
-  res.setHeader('Vary', 'ETag, Content-Encoding');
+  res.vary('ETag, Content-Encoding');
 
   // Show all images
   if (hasNoParams) {
@@ -28,25 +28,32 @@ images.get('/', async (req, res) => {
   }
 
   // Wrong parameters validation
-  const notStrings = [fileName, width, height].some(value => value && typeof value != 'string');
+  const notStrings = [fileName, width, height, fit].some(
+    value => value && typeof value != 'string',
+  );
   if (notStrings || !fileName || !width != !height) {
     return res.sendStatus(400);
   }
 
   // Get original image
-  const getOriginalFile = !!fileName && !width && !height;
+  const getOriginalFile = !width && !height;
   if (getOriginalFile) {
     const originalPath = `${imagesDir}/${fileName}`;
     const mime = (await FileType.fromFile(originalPath))?.mime ?? '';
-    res.setHeader('Content-Type', mime);
+    res.contentType(mime);
     return res.sendFile(originalPath);
   }
 
   // Return existent cached file
-  const cachePath = getCacheFilePath(`${fileName}`, `${width}`, `${height}`);
+  const cachePath = getCacheFilePath(
+    `${fileName}`,
+    `${width}`,
+    `${height}`,
+    fit as string | undefined,
+  );
   if (fs.existsSync(cachePath)) {
     const mime = (await FileType.fromFile(cachePath))?.mime ?? '';
-    res.setHeader('Content-Type', mime);
+    res.contentType(mime);
     return res.sendFile(cachePath);
   }
 
@@ -54,11 +61,13 @@ images.get('/', async (req, res) => {
   try {
     const file = await fsP.readFile(`${imagesDir}/${fileName}`);
     const resizedFile = await sharp(file)
-      .resize(parseInt(`${width}`), parseInt(`${height}`))
+      .resize(parseInt(`${width}`), parseInt(`${height}`), {
+        fit: sharp.fit[fit as keyof sharp.FitEnum] || 'cover',
+      })
       .toBuffer();
     await fsP.writeFile(cachePath, resizedFile);
     const mime = (await FileType.fromFile(cachePath))?.mime ?? '';
-    res.setHeader('Content-Type', mime);
+    res.contentType(mime);
     return res.sendFile(cachePath);
   } catch (error) {
     return res.sendStatus(400);
