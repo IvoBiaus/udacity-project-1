@@ -18,7 +18,7 @@ upload.post('/', async (req, res) => {
     const imagesPath = `${root}/images/${file.name}`;
     try {
       await fs.writeFile(imagesPath, file.data);
-      return res.send(uploadPage('Sucess!'));
+      return res.send(uploadPage('Success!'));
     } catch (error) {
       return res.status(500).send(uploadPage('Failed'));
     }

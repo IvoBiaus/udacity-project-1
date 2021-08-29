@@ -8,20 +8,6 @@ export const header = `
   </div>
 <hr>`;
 
-export const successUpload = `
-  <div style="display: flex;flex-direction: column;width: fit-content">
-    <span>Success!</span>
-    <input style="margin-top: 15px" type="button" value="Go back!" onclick="history.back()">
-  </div>
-`;
-
-export const failedUpload = `
-  <div style="display: flex;flex-direction: column;width: fit-content">
-    <span>Failed</span>
-    <input style="margin-top: 15px" type="button" value="Go back!" onclick="history.back()">
-  </div>
-`;
-
 export const uploadPage = (state = ''): string => `
   ${header}
   <form
