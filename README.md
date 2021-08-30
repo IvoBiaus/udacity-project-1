@@ -14,11 +14,25 @@ or to run locally
 npm start
 ```
 
-For testing:
-**For testing is requiered Node 14.14.0 or higher**
+## Other scripts
+
+- For testing:
+  **For testing is requiered Node 14.14.0 or higher**
 
 ```
 npm test
+```
+
+- Prettier
+
+```
+npm run prettier
+```
+
+- Eslint
+
+```
+npm run lint
 ```
 
 ## Available Endpoints
