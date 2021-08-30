@@ -3,13 +3,13 @@ import supertest from 'supertest';
 import sharp from 'sharp';
 
 import app from '../index';
-import { uploadPage } from '../constants/html';
 import { imagesDir } from '../constants/directories';
 import { getCacheFilePath } from '../utils/helpers';
+import { uploadPage } from '../utils/html';
 
 const request = supertest(app);
 
-describe('Test endpoints responses', async () => {
+describe('Endpoints responses', async () => {
   const testImgStorage = `${__dirname}/mocks`;
   if (!fs.existsSync(testImgStorage)) {
     await fsP.mkdir(testImgStorage);

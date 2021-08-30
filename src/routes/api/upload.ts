@@ -2,9 +2,9 @@ import express from 'express';
 import fileUpload from 'express-fileupload';
 import { promises as fs } from 'fs';
 
-import { uploadPage } from '../../constants/html';
 import { isValidMime } from '../../utils/validators';
 import { root } from '../../constants/directories';
+import { uploadPage } from '../../utils/html';
 
 const upload = express.Router();
 upload.use(fileUpload());

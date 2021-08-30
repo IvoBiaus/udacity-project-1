@@ -4,7 +4,8 @@ import sharp from 'sharp';
 import FileType from 'file-type';
 
 import { imagesDir } from '../../constants/directories';
-import { getCacheFilePath, getGallery, getImg } from '../../utils/helpers';
+import { getCacheFilePath } from '../../utils/helpers';
+import { getGallery, getImg } from '../../utils/html';
 
 const images = express.Router();
 

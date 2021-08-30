@@ -5,7 +5,7 @@ Image processing API that resizes and saves images according to user specificati
 ## Usage
 
 ```
-npm run build && node build/
+npm install && npm run build && node build/
 ```
 
 or to run locally
