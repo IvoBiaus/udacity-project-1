@@ -2,6 +2,7 @@ import express from 'express';
 import fileUpload from 'express-fileupload';
 import { promises as fs } from 'fs';
 
+import { formatNotSupported, success, uploadingError } from '../../constants/messages';
 import { isValidMime } from '../../utils/validators';
 import { root } from '../../constants/directories';
 import { uploadPage } from '../../utils/html';
@@ -18,12 +19,12 @@ upload.post('/', async (req, res) => {
     const imagesPath = `${root}/images/${file.name}`;
     try {
       await fs.writeFile(imagesPath, file.data);
-      return res.send(uploadPage('Success!'));
+      return res.send(uploadPage(success));
     } catch (error) {
-      return res.status(500).send(uploadPage('Failed'));
+      return res.status(500).send(uploadPage(uploadingError));
     }
   }
-  return res.status(400).send(uploadPage('Failed'));
+  return res.status(400).send(uploadPage(formatNotSupported));
 });
 
 export default upload;

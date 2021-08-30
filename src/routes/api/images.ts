@@ -6,6 +6,7 @@ import FileType from 'file-type';
 import { imagesDir } from '../../constants/directories';
 import { getCacheFilePath } from '../../utils/helpers';
 import { getGallery, getImg } from '../../utils/html';
+import { fileNotFound, invalidParameters } from '../../constants/messages';
 
 const images = express.Router();
 
@@ -33,13 +34,16 @@ images.get('/', async (req, res) => {
     value => value && typeof value != 'string',
   );
   if (notStrings || !fileName || !width != !height) {
-    return res.status(400).send('Parameters must be strings');
+    return res.status(400).send(invalidParameters);
   }
 
   // Get original image
   const getOriginalFile = !width && !height;
   if (getOriginalFile) {
     const originalPath = `${imagesDir}/${fileName}`;
+    if (!fs.existsSync(originalPath)) {
+      return res.status(400).send(fileNotFound);
+    }
     const mime = (await FileType.fromFile(originalPath))?.mime ?? '';
     res.contentType(mime);
     return res.sendFile(originalPath);
@@ -71,7 +75,7 @@ images.get('/', async (req, res) => {
     res.contentType(mime);
     return res.sendFile(cachePath);
   } catch (error) {
-    return res.status(500).send('Error when creating the resized image. Contact the developer.');
+    return res.status(400).send(fileNotFound);
   }
 });
 

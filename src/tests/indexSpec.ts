@@ -6,6 +6,7 @@ import app from '../index';
 import { imagesDir } from '../constants/directories';
 import { getCacheFilePath } from '../utils/helpers';
 import { uploadPage } from '../utils/html';
+import { formatNotSupported, success } from '../constants/messages';
 
 const request = supertest(app);
 
@@ -45,7 +46,7 @@ describe('Endpoints responses', async () => {
   });
 
   it('images responds 400 when requesting nonexistent file', async () => {
-    const response = await request.get('/api/images?fileName=nonexistent.png&width=200&height=200');
+    const response = await request.get('/api/images?fileName=nonexistent.png');
     expect(response.status).toBe(400);
   });
 
@@ -86,17 +87,12 @@ describe('Endpoints responses', async () => {
       .attach('image', file, fileName);
     await fsP.rm(filePath);
     await fsP.rm(`${imagesDir}/${fileName}`);
-    expect(response.text).toBe(uploadPage('Success!'));
+    expect(response.text).toBe(uploadPage(success));
   });
 
   it('upload POST responds with failure html when no file is attached', async () => {
     const response = await request.post('/api/upload').set('content-type', 'multipart/form-data');
-    expect(response.text).toBe(uploadPage('Failed'));
-  });
-
-  it('upload POST responds with failure html when no file is attached', async () => {
-    const response = await request.post('/api/upload').set('content-type', 'multipart/form-data');
-    expect(response.text).toBe(uploadPage('Failed'));
+    expect(response.text).toBe(uploadPage(formatNotSupported));
   });
 
   it('upload POST responds with failure html when file is not an image', async () => {
@@ -109,6 +105,6 @@ describe('Endpoints responses', async () => {
       .set('content-type', 'multipart/form-data')
       .attach('image', file, 'report.pdf');
     await fsP.rm(filePath);
-    expect(response.text).toBe(uploadPage('Failed'));
+    expect(response.text).toBe(uploadPage(formatNotSupported));
   });
 });
