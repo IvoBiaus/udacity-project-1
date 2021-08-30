@@ -13,7 +13,7 @@ if (!fs.existsSync(cacheDir)) {
 const app = express();
 const port = 3000;
 
-app.listen(port, () => {
+app.listen(port, (): void => {
   console.log(`Server has started at: http://localhost:${port}`);
 });
 

@@ -1,12 +1,12 @@
 import fs, { promises as fsP } from 'fs';
 import supertest from 'supertest';
-import sharp from 'sharp';
 
 import app from '../index';
 import { imagesDir } from '../constants/directories';
 import { getCacheFilePath } from '../utils/helpers';
 import { uploadPage } from '../utils/html';
 import { formatNotSupported, success } from '../constants/messages';
+import { getMockBuffer } from '../utils/imageProcessing';
 
 const request = supertest(app);
 
@@ -15,14 +15,6 @@ describe('Endpoints responses', async () => {
   if (!fs.existsSync(testImgStorage)) {
     await fsP.mkdir(testImgStorage);
   }
-  const mockSharp = sharp({
-    create: {
-      width: 1,
-      height: 1,
-      channels: 4,
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    },
-  }).png();
 
   it('server responds correctly', async () => {
     const response = await request.get('/');
@@ -37,7 +29,7 @@ describe('Endpoints responses', async () => {
   it('images responds 200 with all the parameters and existent file', async () => {
     const fileName = `${Date.now()}.png`;
     const filePath = `${imagesDir}/${fileName}`;
-    await fsP.writeFile(filePath, await mockSharp.toBuffer());
+    await fsP.writeFile(filePath, await getMockBuffer());
 
     const response = await request.get(`/api/images?fileName=${fileName}&width=200&height=200`);
     expect(response.status).toBe(200);
@@ -78,7 +70,7 @@ describe('Endpoints responses', async () => {
   it('upload POST responds with success html when the file is attached & uploaded', async () => {
     const fileName = `${Date.now()}.png`;
     const filePath = `${__dirname}/mocks/${fileName}`;
-    await fsP.writeFile(filePath, await mockSharp.toBuffer());
+    await fsP.writeFile(filePath, await getMockBuffer());
     const file = await fsP.readFile(filePath);
 
     const response = await request
@@ -97,7 +89,7 @@ describe('Endpoints responses', async () => {
 
   it('upload POST responds with failure html when file is not an image', async () => {
     const filePath = `${__dirname}/mocks/report.pdf`;
-    await fsP.writeFile(filePath, await mockSharp.toBuffer());
+    await fsP.writeFile(filePath, await getMockBuffer());
     const file = await fsP.readFile(filePath);
 
     const response = await request

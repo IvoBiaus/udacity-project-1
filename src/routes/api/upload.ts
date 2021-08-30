@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
 import { promises as fs } from 'fs';
 
+import { ResponseReturn } from '../../interfaces/responseReturn';
 import { formatNotSupported, success, uploadingError } from '../../constants/messages';
 import { isValidMime } from '../../utils/validators';
 import { root } from '../../constants/directories';
@@ -10,9 +11,9 @@ import { uploadPage } from '../../utils/html';
 const upload = express.Router();
 upload.use(fileUpload());
 
-upload.get('/', (req, res) => res.send(uploadPage()));
+upload.get('/', (req: Request, res: Response): ResponseReturn => res.send(uploadPage()));
 
-upload.post('/', async (req, res) => {
+upload.post('/', async (req: Request, res: Response): Promise<ResponseReturn> => {
   const file = req.files?.image as fileUpload.UploadedFile | undefined;
 
   if (file && isValidMime(file.mimetype)) {
