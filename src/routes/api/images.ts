@@ -33,7 +33,7 @@ images.get('/', async (req, res) => {
     value => value && typeof value != 'string',
   );
   if (notStrings || !fileName || !width != !height) {
-    return res.sendStatus(400);
+    return res.status(400).send('Parameters must be strings');
   }
 
   // Get original image
@@ -71,7 +71,7 @@ images.get('/', async (req, res) => {
     res.contentType(mime);
     return res.sendFile(cachePath);
   } catch (error) {
-    return res.sendStatus(400);
+    return res.status(500).send('Error when creating the resized image. Contact the developer.');
   }
 });
 
